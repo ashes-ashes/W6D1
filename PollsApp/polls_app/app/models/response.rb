@@ -12,6 +12,7 @@
 class Response < ApplicationRecord
 
   validate :not_duplicate_response
+  validate :not_author
 
   belongs_to :answer_choice,
     foreign_key: :answer_choice_id,
@@ -34,6 +35,10 @@ class Response < ApplicationRecord
     self.sibling_responses.exists?(user_id: self.user_id)
   end
 
+  def respondent_is_author?
+    (self.question.poll.author) == (self.respondent)
+  end
+
   private
   def not_duplicate_response
     if respondent_already_answered?
@@ -41,4 +46,9 @@ class Response < ApplicationRecord
     end
   end
 
+  def not_author
+    if respondent_is_author?
+      errors[:respondent] << 'respondent is author of poll'
+    end
+  end
 end
